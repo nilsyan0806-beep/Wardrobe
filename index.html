@@ -892,36 +892,29 @@ function go(id){
   // Header buttons: vary by tab
   const btnBulk=document.getElementById('btnBulk');
   const btnAdd=document.getElementById('btnAdd');
-  const btnWish=document.getElementById('btnWish');
   if(id==='home'||id==='wardrobe'){
-    btnBulk.style.display='flex';btnAdd.style.display='flex';
-    if(btnWish)btnWish.style.display='none';
+    if(btnBulk)btnBulk.style.display='flex';
+    if(btnAdd)btnAdd.style.display='flex';
   } else if(id==='looks'){
-    btnBulk.style.display='none';
-    btnAdd.style.display='flex';btnAdd.title='Собрать образ';
-    btnAdd.querySelector('i').className='ti ti-sparkles';
-    btnAdd.setAttribute('onclick','openLookModal()');
-    if(btnWish)btnWish.style.display='none';
+    if(btnBulk)btnBulk.style.display='none';
+    if(btnAdd){btnAdd.style.display='flex';btnAdd.title='Собрать образ';if(btnAdd.querySelector('i'))btnAdd.querySelector('i').className='ti ti-sparkles';btnAdd.setAttribute('onclick','openLookModal()');}
   } else if(id==='shop'||id==='wishlist'){
     btnBulk.style.display='none';
     btnAdd.style.display='flex';btnAdd.title='Добавить желание';
-    btnAdd.querySelector('i').className='ti ti-heart';
+    if(btnAdd&&btnAdd.querySelector('i'))btnAdd.querySelector('i').className='ti ti-heart';
     btnAdd.setAttribute('onclick','openWishAddModal()');
     if(btnWish)btnWish.style.display='none';
   } else {
-    btnBulk.style.display='none';btnAdd.style.display='none';
-    if(btnWish)btnWish.style.display='none';
+    if(btnBulk)btnBulk.style.display='none';
+    if(btnAdd)btnAdd.style.display='none';
   }
   if(id==='wardrobe')renderWardrobe();
   if(id==='looks'){renderLooks();genLooksRandom();}
   if(id==='shop')renderShop();
   if(id==='wishlist')renderWishlist();
   if(id==='home'){
-    btnAdd.title='Добавить вещь';
-    btnAdd.querySelector('i').className='ti ti-plus';
-    btnAdd.onclick=null;
-    btnAdd.setAttribute('onclick','openAdd()');
-    btnBulk.setAttribute('onclick','openBulk()');
+    if(btnAdd){btnAdd.title='Добавить вещь';if(btnAdd.querySelector('i'))btnAdd.querySelector('i').className='ti ti-plus';btnAdd.setAttribute('onclick','openAdd()');}
+    if(btnBulk)btnBulk.setAttribute('onclick','openBulk()');
     renderRecent();updateStats();
   }
   if(id==='settings'){renderDislikedList();}
@@ -1332,7 +1325,7 @@ let looksItemCatFilter='';
 function looksItemCatClick(cat,el){
   document.querySelectorAll('#looksItemCatRow .lf-chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
-  looksItemCatFilter=cat;
+  looksItemCatFilter=cat||'';
   looksItemFilterVal='';
   renderLooksItemSubRow();
   renderLooks();
@@ -1345,12 +1338,25 @@ function renderLooksItemSubRow(){
   if(!looksItemCatFilter){row.innerHTML='';row.style.display='none';return;}
   const catItems=used.filter(i=>i.category===looksItemCatFilter);
   if(!catItems.length){row.innerHTML='<span style="font-size:12px;color:var(--text-light);padding:4px;">Нет вещей</span>';row.style.display='flex';return;}
-  row.innerHTML='<div class="lf-chip'+(looksItemFilterVal===''?' active':'')+'" onclick="looksItemClick('',this)">Все</div>'+
-    catItems.map(i=>`<div class="lf-chip${looksItemFilterVal===String(i.id)?' active':''}" onclick="looksItemClick('${i.id}',this)">${short4(i.name)}</div>`).join('');
+  const allDiv=document.createElement('div');
+  allDiv.className='lf-chip'+(looksItemFilterVal===''?' active':'');
+  allDiv.dataset.iid='';
+  allDiv.onclick=function(){looksItemClick('',this);};
+  allDiv.textContent='Все';
+  row.innerHTML='';
+  row.appendChild(allDiv);
+  catItems.forEach(i=>{
+    const d=document.createElement('div');
+    d.className='lf-chip'+(looksItemFilterVal===String(i.id)?' active':'');
+    d.dataset.iid=String(i.id);
+    d.onclick=function(){looksItemClick(this.dataset.iid,this);};
+    d.textContent=short4(i.name);
+    row.appendChild(d);
+  });
   row.style.display='flex';
 }
 function looksItemClick(val,el){
-  looksItemFilterVal=val;renderLooks();
+  looksItemFilterVal=val||'';renderLooks();
   document.querySelectorAll('#looksItemSubRow .lf-chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
 }
@@ -1362,23 +1368,11 @@ function populateLooksItemFilter(){
   const usedIds=new Set(looks.flatMap(l=>l.itemIds||[]));
   const used=pool.filter(i=>usedIds.has(String(i.id)));
   const cats=[...new Set(used.map(i=>i.category))];
-  catRow.innerHTML='<div class="lf-chip'+(looksItemCatFilter===''?' active':'')+'" onclick="looksItemCatClick('',this)">Все вещи</div>'+
-    cats.map(c=>`<div class="lf-chip${looksItemCatFilter===c?' active':''}" onclick="looksItemCatClick('${c}',this)">${CL[c]||c}</div>`).join('');
+  catRow.innerHTML='<div class="lf-chip'+(looksItemCatFilter===''?' active':'')+'" onclick="looksItemCatClick(this.dataset.cat,this)" data-cat="">Все вещи</div>'+
+    cats.map(c=>`<div class="lf-chip${looksItemCatFilter===c?' active':''}" onclick="looksItemCatClick(this.dataset.cat,this)" data-cat="${c}">${CL[c]||c}</div>`).join('');
   renderLooksItemSubRow();
-  return;
-  // old code below (dead)
-  function _old(){
-  const sel=document.getElementById('looksItemFilter');
-  if(!sel)return;
-  const pool=[...wardrobe,...wishlist.filter(w=>w.category).map(w=>({...w,id:'w'+w.id}))];
-  const usedIds=new Set(looks.flatMap(l=>l.itemIds||[]));
-  const used=pool.filter(i=>usedIds.has(String(i.id)));
-  sel.style.display=used.length?'block':'none';
-  const cur=sel.value;
-  sel.innerHTML='<option value="">Все вещи</option>'+used.map(i=>`<option value="${i.id}">${short4(i.name)}</option>`).join('');
-  if(cur)sel.value=cur;
-  }}
 }
+
 function looksSeaFilter(val,el){document.querySelectorAll('#looksSeaRow .lf-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');looksSeaFilterVal=val;renderLooks();}
 function looksFilter(val,el){document.querySelectorAll('#looksFilterRow .lf-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');looksFilterVal=val;renderLooks();}
 async function renderLooks(){
@@ -1540,8 +1534,7 @@ let _t;function toast(msg){clearTimeout(_t);const t=document.getElementById('toa
 function resizeImg(file,maxPx,q,cb){const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;if(w>maxPx||h>maxPx){if(w>h){h=Math.round(h*maxPx/w);w=maxPx;}else{w=Math.round(w*maxPx/h);h=maxPx;}}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',q));};img.src=ev.target.result;};r.readAsDataURL(file);}
 function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-document.getElementById('btnBulk').addEventListener('click',openBulk);
-document.getElementById('btnAdd').addEventListener('click',openAdd);
+// buttons managed by go() via setAttribute
 
 // ═══ INIT ═══
 openDB().then(()=>{load();setDate();loadWeather();updateStats();renderRecent();renderShop();}).catch(()=>{load();setDate();loadWeather();updateStats();renderRecent();renderShop();});
