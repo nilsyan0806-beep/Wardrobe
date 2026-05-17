@@ -1247,7 +1247,7 @@ async function renderItemPicker(){
     const thumbs=await Promise.all(items.map(async item=>{
       const rawId=String(item.id).replace('w','');const src=item.hasPhoto?await photo(rawId):null;
       const isSel=Array.isArray(pickerSel[slot.key])?pickerSel[slot.key].includes(String(item.id)):pickerSel[slot.key]===String(item.id);
-      return`<div class="picker-thumb${isSel?' sel':''}" onclick="pickerSelect('${slot.key}','${item.id}')" title="${item.name}">
+      return`<div class="picker-thumb${isSel?' sel':''}" data-thumb-id="${item.id}" onclick="pickerSelect('${slot.key}','${item.id}')" title="${item.name}">
         ${src?`<img src="${src}">`:`<div style="font-size:24px;">${item.emoji||'👗'}</div>`}
         ${item._wish?`<div class="wish-dot" title="Из вишлиста"></div>`:''}
         ${isSel?`<div class="sel-check"><i class="ti ti-check" style="color:white;font-size:16px;text-shadow:0 1px 3px rgba(0,0,0,.5)"></i></div>`:''}
@@ -1255,26 +1255,51 @@ async function renderItemPicker(){
     }));
     const selArr=Array.isArray(pickerSel[slot.key])?pickerSel[slot.key]:(pickerSel[slot.key]?[pickerSel[slot.key]]:[]);
     return`<div class="picker-section">
-      <div class="picker-section-label">${slot.label}${selArr.length?`<span style="color:var(--gold);font-weight:600;font-size:10px;"> ×${selArr.length}</span><span class="picker-clr-btn" onclick="pickerSelect('${slot.key}',null)"> Убрать всё</span>`:''}
+      <div class="picker-section-label" data-slot="${slot.key}">${slot.label}${selArr.length?`<span style="color:var(--gold);font-weight:600;font-size:10px;"> ×${selArr.length}</span><span class="picker-clr-btn" onclick="pickerSelect('${slot.key}',null)"> Убрать всё</span>`:''}
       </div>
       <div style="font-size:10px;color:var(--text-light);margin-bottom:6px;">Можно выбрать несколько</div>
       <div class="picker-scroll" data-slot="${slot.key}">${items.length?thumbs.join(''):`<span class="picker-none">Нет вещей этой категории</span>`}</div>
     </div>`;
   }));
   document.getElementById('itemPicker').innerHTML=parts.join('');
-  // Restore scroll positions by slot key
-  document.querySelectorAll('.picker-scroll').forEach(el=>{if(scrollPos&&scrollPos[el.dataset.slot])el.scrollLeft=scrollPos[el.dataset.slot];});
+  // scroll positions preserved via in-place DOM updates in pickerSelect
 }
 async function pickerSelect(cat,id){
-  // Save scroll positions by slot key
-  const scrollPos={};
-  document.querySelectorAll('.picker-scroll').forEach(el=>{scrollPos[el.dataset.slot]=el.scrollLeft;});
   if(id==='null'||!id){pickerSel[cat]=[];await renderItemPicker();return;}
   const sid=String(id);
   if(!Array.isArray(pickerSel[cat]))pickerSel[cat]=[];
   const idx=pickerSel[cat].indexOf(sid);
   if(idx>=0)pickerSel[cat].splice(idx,1);else pickerSel[cat].push(sid);
-  await renderItemPicker();
+
+  // Update in-place: toggle classes without re-rendering, so scroll stays put
+  const scroll=document.querySelector('.picker-scroll[data-slot="'+cat+'"]');
+  if(scroll){
+    scroll.querySelectorAll('.picker-thumb').forEach(thumb=>{
+      const tid=thumb.getAttribute('data-thumb-id');
+      if(tid===null)return;
+      const isSel=pickerSel[cat].includes(tid);
+      thumb.classList.toggle('sel',isSel);
+      let chk=thumb.querySelector('.sel-check');
+      if(isSel&&!chk){
+        chk=document.createElement('div');chk.className='sel-check';
+        chk.innerHTML='<i class="ti ti-check" style="color:white;font-size:16px;text-shadow:0 1px 3px rgba(0,0,0,.5)"></i>';
+        thumb.appendChild(chk);
+      } else if(!isSel&&chk){chk.remove();}
+    });
+    // Update count badge
+    const lbl=document.querySelector('.picker-section-label[data-slot="'+cat+'"]');
+    if(lbl){
+      let cnt=lbl.querySelector('.picker-count');
+      let clr=lbl.querySelector('.picker-clr-btn');
+      if(pickerSel[cat].length){
+        if(!cnt){cnt=document.createElement('span');cnt.className='picker-count';cnt.style.cssText='color:var(--gold);font-weight:600;font-size:10px;';lbl.appendChild(cnt);}
+        cnt.textContent=' x'+pickerSel[cat].length;
+        if(!clr){clr=document.createElement('span');clr.className='picker-clr-btn';clr.style.cursor='pointer';clr.textContent=' Убрать всё';clr.onclick=()=>pickerSelect(cat,null);lbl.appendChild(clr);}
+      } else {if(cnt)cnt.remove();if(clr)clr.remove();}
+    }
+  } else {
+    await renderItemPicker();
+  }
 }
 async function saveLook(){
   const selIds=Object.values(pickerSel).flatMap(v=>Array.isArray(v)?v:(v?[v]:[]));if(!selIds.length){toast('Выберите хотя бы одну вещь');return;}
