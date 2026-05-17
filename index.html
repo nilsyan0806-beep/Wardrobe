@@ -376,11 +376,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
     <div class="lf-chip" onclick="looksSeaFilter('summer',this)">Лето</div>
     <div class="lf-chip" onclick="looksSeaFilter('winter',this)">Зима</div>
   </div>
-  <div class="looks-filter-row" id="looksItemRow" style="display:none;">
-  </div>
-  <select id="looksItemFilter" style="width:100%;padding:9px 11px;border:1px solid var(--warm-beige);border-radius:50px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-dark);background:var(--white);outline:none;appearance:none;margin-bottom:14px;display:none;" onchange="looksItemFilterChange(this.value)">
-    <option value="">Все вещи</option>
-  </select>
+  <div class="looks-filter-row" id="looksItemCatRow"></div>
+  <div class="looks-filter-row" id="looksItemSubRow" style="display:none;"></div>
   <div id="looksGrid"></div>
 </div>
 
@@ -716,7 +713,7 @@ function save(){try{localStorage.setItem('wb_w',JSON.stringify(wardrobe));localS
 // ═══ BACKUP ═══
 async function exportBackup(){
   const photos=await dbGetAll();
-  const blob=new Blob([JSON.stringify({v:2,wardrobe,looks,wishlist,photos,ts:Date.now()})],{type:'application/json'});
+  const blob=new Blob([JSON.stringify({v:2,wardrobe,looks,wishlist,dislikedOutfits,photos,ts:Date.now()})],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`wardrobe-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();
   URL.revokeObjectURL(url);toast('✓ Резервная копия сохранена');
@@ -727,7 +724,7 @@ async function importBackup(e){
     const data=JSON.parse(await file.text());
     if(!data.wardrobe)throw new Error('Invalid');
     if(!confirm('Восстановить данные? Текущие данные будут заменены.'))return;
-    wardrobe=data.wardrobe||[];looks=data.looks||[];wishlist=data.wishlist||[];
+    wardrobe=data.wardrobe||[];looks=data.looks||[];wishlist=data.wishlist||[];dislikedOutfits=data.dislikedOutfits||[];saveDisliked();
     save();
     if(data.photos)await dbSetAll(data.photos);
     updateStats();renderRecent();renderLooks();renderWishlist();genOutfit();
@@ -903,13 +900,13 @@ function go(id){
     btnBulk.style.display='none';
     btnAdd.style.display='flex';btnAdd.title='Собрать образ';
     btnAdd.querySelector('i').className='ti ti-sparkles';
-    btnAdd.onclick=()=>openLookModal();
+    btnAdd.setAttribute('onclick','openLookModal()');
     if(btnWish)btnWish.style.display='none';
   } else if(id==='shop'||id==='wishlist'){
     btnBulk.style.display='none';
     btnAdd.style.display='flex';btnAdd.title='Добавить желание';
     btnAdd.querySelector('i').className='ti ti-heart';
-    btnAdd.onclick=()=>openWishAddModal();
+    btnAdd.setAttribute('onclick','openWishAddModal()');
     if(btnWish)btnWish.style.display='none';
   } else {
     btnBulk.style.display='none';btnAdd.style.display='none';
@@ -920,10 +917,11 @@ function go(id){
   if(id==='shop')renderShop();
   if(id==='wishlist')renderWishlist();
   if(id==='home'){
-    // Reset add button to default
     btnAdd.title='Добавить вещь';
     btnAdd.querySelector('i').className='ti ti-plus';
-    btnAdd.onclick=()=>openAdd();
+    btnAdd.onclick=null;
+    btnAdd.setAttribute('onclick','openAdd()');
+    btnBulk.setAttribute('onclick','openBulk()');
     renderRecent();updateStats();
   }
   if(id==='settings'){renderDislikedList();}
@@ -990,7 +988,7 @@ async function genOutfit(){
   // Update label with weather context
   const condLabel=isRain?'☔ Дождливо':isSnow?'❄️ Снег':isStormy?'💨 Ветрено':isCold?'🧊 Холодно':isWarm?'☀️ Тепло':'🌤 Комфортно';
   document.getElementById('outfitLabel').textContent=`${condLabel} · ${feel}° · Образ дня`;
-  document.getElementById('outfitSlots').innerHTML=items.map((item,i)=>{const src=photos[i];return`<div class="outfit-slot">${src?`<img src="${src}">`:`<div class="empty-icon"><i class="ti ti-hanger" style="font-size:20px;color:var(--mocha);"></i></div>`}<div class="slot-label">${item.name}${item._wish?' <span style="font-size:9px">🛍</span>':''}</div></div>`;}).join('');
+  document.getElementById('outfitSlots').innerHTML=items.map((item,i)=>{const src=photos[i];return`<div class="outfit-slot">${src?`<img src="${src}">`:`<div class="empty-icon"><i class="ti ti-hanger" style="font-size:20px;color:var(--mocha);"></i></div>`}<div class="slot-label">${item.name}${item._wish?'<span style="font-size:9px;margin-left:2px;">🛍</span>':''}</div></div>`;}).join('');
 }
 async function saveOutfitAsLook(){
   if(!lastOutfitItems.length){toast('Сначала сгенерируйте образ');return;}
@@ -1005,20 +1003,30 @@ async function genLooksRandom(){
   if(!wardrobe.length){document.getElementById('looksRandomSlots').innerHTML=`<div style="padding:16px;color:var(--text-light);font-size:13px;width:100%;text-align:center;">Добавьте вещи в гардероб</div>`;return;}
   const pick=arr=>arr.length?arr[Math.floor(Math.random()*arr.length)]:null;
   const by=cat=>all.filter(i=>i.category===cat);
-  const shoe=pick(by('shoes')),outer=Math.random()<0.4?pick(by('outerwear')):null;
-  const dresses=by('dress');const useDress=dresses.length>0&&Math.random()<0.35;
-  let items=[];
-  if(useDress){const d=pick(dresses);if(d)items.push(d);}else{const top=pick(by('top')),bot=pick(by('bottom'));if(top)items.push(top);if(bot)items.push(bot);}
-  if(shoe)items.push(shoe);if(outer)items.push(outer);
+  const hasShoes=by('shoes').length>0;
+  let items=[],_b=0;
+  while(_b<30){
+    items=[];
+    const shoe=pick(by('shoes'));const outer=Math.random()<0.4?pick(by('outerwear')):null;
+    const useDress=by('dress').length>0&&Math.random()<0.35;
+    if(useDress){const d=pick(by('dress'));if(d)items.push(d);}else{const top=pick(by('top')),bot=pick(by('bottom'));if(top)items.push(top);if(bot)items.push(bot);}
+    if(shoe)items.push(shoe);if(outer)items.push(outer);
+    // п.8: removed isSavedLook check; only avoid disliked outfits
+    if(items.length&&!isDisliked(items)&&(!hasShoes||!!shoe))break;
+    _b++;
+  }
   looksRandomItems=items;
   if(!items.length){document.getElementById('looksRandomSlots').innerHTML=`<div style="padding:16px;color:var(--text-light);font-size:13px;width:100%;text-align:center;">Добавьте вещи в гардероб</div>`;return;}
   const photos=await Promise.all(items.map(i=>photo(String(i.id).replace(/^w/,''))));
-  document.getElementById('looksRandomSlots').innerHTML=items.map((item,i)=>{const src=photos[i];return`<div class="outfit-slot">${src?`<img src="${src}">`:`<div class="empty-icon"><i class="ti ti-hanger" style="font-size:20px;color:var(--mocha);"></i></div>`}<div class="slot-label">${item.name}</div></div>`;}).join('');
+  // п.7: show 🛍 for wishlist items
+  document.getElementById('looksRandomSlots').innerHTML=items.map((item,i)=>{
+    const src=photos[i];
+    return`<div class="outfit-slot">${src?`<img src="${src}">`:`<div class="empty-icon"><i class="ti ti-hanger" style="font-size:20px;color:var(--mocha);"></i></div>`}<div class="slot-label">${item.name}${item._wish?'<span style="font-size:9px;margin-left:2px;">🛍</span>':''}</div></div>`;
+  }).join('');
 }
 async function saveLooksRandomOutfit(){
   if(!looksRandomItems.length){toast('Сначала сгенерируйте образ');return;}
-  const rk=looksRandomItems.map(i=>i.id).slice().sort().join(',');
-  if(looks.some(l=>(l.itemIds||[]).slice().sort().join(',')===rk)){toast('Такой образ уже сохранён!');genLooksRandom();return;}
+  // п.8: no duplicate check removed
   const hasWR=looksRandomItems.some(i=>String(i.id).startsWith('w'));
   looks.unshift({id:Date.now(),itemIds:looksRandomItems.map(i=>i.id),itemNames:looksRandomItems.map(i=>i.name),itemCats:looksRandomItems.map(i=>i.category),note:'',hasWish:hasWR,style:'casual',createdAt:new Date().toISOString()});
   save();updateStats();renderLooks();toast('✓ Образ сохранён');genLooksRandom();
@@ -1073,7 +1081,7 @@ function openAdd(){
   document.getElementById('addUpZone').style.display='block';document.getElementById('addReCropBtn').style.display='none';
   document.getElementById('addName').value='';document.getElementById('addFile').value='';
   try{document.getElementById('aiBar').classList.remove('show');}catch(e){}const _asb=document.getElementById('addSaveBtn');if(_asb){_asb.disabled=false;_asb.textContent='Добавить';}
-  try{document.getElementById('addCpSwatch').style.background='#888';document.getElementById('addCpHex').textContent='#888888';}catch(e){}document.querySelectorAll('#addPresetRow .color-preset-dot').forEach(d=>d.classList.remove('sel'));document.getElementById('addPaletteWrap').classList.remove('open');
+  try{const _as=document.getElementById('addCpSwatch');const _ah=document.getElementById('addCpHex');const _ap=document.getElementById('addPaletteWrap');if(_as)_as.style.background='#888';if(_ah)_ah.textContent='#888888';if(_ap)_ap.classList.remove('open');}catch(e){}document.querySelectorAll('#addPresetRow .color-preset-dot').forEach(d=>d.classList.remove('sel'));
   setSeasons('addSeaChips',['all']);document.getElementById('addCat').value='top';document.getElementById('addStyle').value='casual';
   document.getElementById('addModal').classList.add('open');
   // CP canvas initializes on demand when palette opened
@@ -1097,7 +1105,7 @@ async function openEdit(id){
   document.getElementById('editCat').value=item.category;
   document.getElementById('editStyle').value=item.style||'casual';
   setSeasons('editSeaChips',item.seasons||[item.season||'all']);
-  document.getElementById('editCpSwatch').style.background=editColor;document.getElementById('editCpHex').textContent=editColor;document.getElementById('editPaletteWrap').classList.remove('open');const closestPreset=[...document.querySelectorAll('#editPresetRow .color-preset-dot')].find(d=>d.dataset.c===editColor);document.querySelectorAll('#editPresetRow .color-preset-dot').forEach(d=>d.classList.remove('sel'));if(closestPreset)closestPreset.classList.add('sel');
+  try{const _es=document.getElementById('editCpSwatch');const _eh=document.getElementById('editCpHex');if(_es)_es.style.background=editColor;if(_eh)_eh.textContent=editColor;}catch(e){}
   const src=item.hasPhoto?await photo(id):null;
   const prev=document.getElementById('editPreview');
   if(src){prev.src=src;prev.style.display='block';}else prev.style.display='none';
@@ -1196,11 +1204,11 @@ function renderBulkQueue(){
           ${['#FDFAF6','#2A1F1A','#7A8FA6','#9BAF96','#E8C4B8','#C9A84C','#8B6F5E','#D4C4A8','#D85A30','#666666'].map(c=>`<div class="color-preset-dot${item.color===c?' sel':''}" style="background:${c};${c==='#FDFAF6'?'border-color:#ccc;':''}" onclick="bqPickPreset(${i},this,'${c}')"></div>`).join('')}
           <button class="color-more-btn" onclick="toggleBqPalette(${i})">🎨 Ещё</button>
         </div>
-        <div class="color-palette-wrap" id="bqPalette_${i}">
+        <div class="color-palette-wrap" id="bqPalette_${i}" style="display:none!important">
           <canvas class="bq-cp-mini" id="bqCp_${i}"></canvas>
           <input type="range" class="bq-hue-mini" id="bqHue_${i}" min="0" max="360" value="0">
         </div>
-        <div class="bq-color-preview">
+        <div class="bq-color-preview" style="display:none">
           <div class="bq-color-swatch" id="bqSwatch_${i}" style="background:${item.color||'#888'};"></div>
           <span class="bq-color-hex" id="bqHex_${i}">${item.color||'#888888'}</span>
         </div>
@@ -1257,17 +1265,17 @@ async function renderItemPicker(){
       <div class="picker-section-label">${slot.label}${selArr.length?`<span style="color:var(--gold);font-weight:600;font-size:10px;"> ×${selArr.length}</span><span class="picker-clr-btn" onclick="pickerSelect('${slot.key}',null)"> Убрать всё</span>`:''}
       </div>
       <div style="font-size:10px;color:var(--text-light);margin-bottom:6px;">Можно выбрать несколько</div>
-      <div class="picker-scroll">${items.length?thumbs.join(''):`<span class="picker-none">Нет вещей этой категории</span>`}</div>
+      <div class="picker-scroll" data-slot="${slot.key}">${items.length?thumbs.join(''):`<span class="picker-none">Нет вещей этой категории</span>`}</div>
     </div>`;
   }));
   document.getElementById('itemPicker').innerHTML=parts.join('');
-  // Restore scroll positions
-  document.querySelectorAll('.picker-scroll').forEach((el,i)=>{if(scrollPos&&scrollPos[i])el.scrollLeft=scrollPos[i];});
+  // Restore scroll positions by slot key
+  document.querySelectorAll('.picker-scroll').forEach(el=>{if(scrollPos&&scrollPos[el.dataset.slot])el.scrollLeft=scrollPos[el.dataset.slot];});
 }
 async function pickerSelect(cat,id){
-  // Save scroll positions before re-render
+  // Save scroll positions by slot key
   const scrollPos={};
-  document.querySelectorAll('.picker-scroll').forEach((el,i)=>{scrollPos[i]=el.scrollLeft;});
+  document.querySelectorAll('.picker-scroll').forEach(el=>{scrollPos[el.dataset.slot]=el.scrollLeft;});
   if(id==='null'||!id){pickerSel[cat]=[];await renderItemPicker();return;}
   const sid=String(id);
   if(!Array.isArray(pickerSel[cat]))pickerSel[cat]=[];
@@ -1320,8 +1328,46 @@ async function renderDislikedList(){
   }));
   el.innerHTML=parts.join('');
 }
+let looksItemCatFilter='';
+function looksItemCatClick(cat,el){
+  document.querySelectorAll('#looksItemCatRow .lf-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  looksItemCatFilter=cat;
+  looksItemFilterVal='';
+  renderLooksItemSubRow();
+  renderLooks();
+}
+function renderLooksItemSubRow(){
+  const row=document.getElementById('looksItemSubRow');if(!row)return;
+  const pool=[...wardrobe,...wishlist.filter(w=>w.category).map(w=>({...w,id:'w'+w.id}))];
+  const usedIds=new Set(looks.flatMap(l=>l.itemIds||[]));
+  const used=pool.filter(i=>usedIds.has(String(i.id)));
+  if(!looksItemCatFilter){row.innerHTML='';row.style.display='none';return;}
+  const catItems=used.filter(i=>i.category===looksItemCatFilter);
+  if(!catItems.length){row.innerHTML='<span style="font-size:12px;color:var(--text-light);padding:4px;">Нет вещей</span>';row.style.display='flex';return;}
+  row.innerHTML='<div class="lf-chip'+(looksItemFilterVal===''?' active':'')+'" onclick="looksItemClick('',this)">Все</div>'+
+    catItems.map(i=>`<div class="lf-chip${looksItemFilterVal===String(i.id)?' active':''}" onclick="looksItemClick('${i.id}',this)">${short4(i.name)}</div>`).join('');
+  row.style.display='flex';
+}
+function looksItemClick(val,el){
+  looksItemFilterVal=val;renderLooks();
+  document.querySelectorAll('#looksItemSubRow .lf-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+}
 function looksItemFilterChange(val){looksItemFilterVal=val;renderLooks();}
 function populateLooksItemFilter(){
+  // Build category chips for first level
+  const catRow=document.getElementById('looksItemCatRow');if(!catRow)return;
+  const pool=[...wardrobe,...wishlist.filter(w=>w.category).map(w=>({...w,id:'w'+w.id}))];
+  const usedIds=new Set(looks.flatMap(l=>l.itemIds||[]));
+  const used=pool.filter(i=>usedIds.has(String(i.id)));
+  const cats=[...new Set(used.map(i=>i.category))];
+  catRow.innerHTML='<div class="lf-chip'+(looksItemCatFilter===''?' active':'')+'" onclick="looksItemCatClick('',this)">Все вещи</div>'+
+    cats.map(c=>`<div class="lf-chip${looksItemCatFilter===c?' active':''}" onclick="looksItemCatClick('${c}',this)">${CL[c]||c}</div>`).join('');
+  renderLooksItemSubRow();
+  return;
+  // old code below (dead)
+  function _old(){
   const sel=document.getElementById('looksItemFilter');
   if(!sel)return;
   const pool=[...wardrobe,...wishlist.filter(w=>w.category).map(w=>({...w,id:'w'+w.id}))];
@@ -1331,6 +1377,7 @@ function populateLooksItemFilter(){
   const cur=sel.value;
   sel.innerHTML='<option value="">Все вещи</option>'+used.map(i=>`<option value="${i.id}">${short4(i.name)}</option>`).join('');
   if(cur)sel.value=cur;
+  }}
 }
 function looksSeaFilter(val,el){document.querySelectorAll('#looksSeaRow .lf-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');looksSeaFilterVal=val;renderLooks();}
 function looksFilter(val,el){document.querySelectorAll('#looksFilterRow .lf-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');looksFilterVal=val;renderLooks();}
@@ -1358,7 +1405,7 @@ async function renderLooks(){
       <div class="look-slots">${slots||`<div style="padding:16px;color:var(--text-light);font-size:13px;">Вещи не найдены</div>`}</div>
       <div class="look-footer">
         ${look.note?`<div class="look-note">"${look.note}"</div>`:''}
-        ${wishItems.length?`<div class="look-tags">${wishItems.map(i=>`<span class="look-tag wish" style="background:var(--blush);border-color:var(--mocha);color:var(--espresso);">🛍 ${short4(i.name)}</span>`).join('')}</div>`:look.itemNames&&look.itemNames.length?`<div class="look-tags">${look.itemNames.slice(0,3).map(n=>`<span class="look-tag">${n}</span>`).join('')}</div>`:''}
+        ${wishItems.length?`<div class="look-tags">${wishItems.map(i=>`<span class="look-tag wish" style="background:var(--blush);border-color:var(--mocha);color:var(--espresso);">🛍 ${short4(i.name)}</span>`).join('')}</div>`:''}
       </div>
     </div>`;
   }));
