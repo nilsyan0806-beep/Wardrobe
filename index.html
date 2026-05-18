@@ -985,6 +985,8 @@ async function genOutfit(){
 }
 async function saveOutfitAsLook(){
   if(!lastOutfitItems.length){toast('Сначала сгенерируйте образ');return;}
+  const ok=lastOutfitItems.map(i=>String(i.id)).sort().join(',');
+  if(looks.some(l=>(l.itemIds||[]).map(id=>String(id)).sort().join(',')===ok)){toast('Такой образ уже сохранён!');genOutfit();return;}
   looks.unshift({id:Date.now(),itemIds:lastOutfitItems.map(i=>i.id),itemNames:lastOutfitItems.map(i=>i.name),itemCats:lastOutfitItems.map(i=>i.category),note:'',hasWish:false,style:'casual',createdAt:new Date().toISOString()});
   save();updateStats();toast('✓ Образ сохранён в Луки');genOutfit();
 }
@@ -1019,7 +1021,8 @@ async function genLooksRandom(){
 }
 async function saveLooksRandomOutfit(){
   if(!looksRandomItems.length){toast('Сначала сгенерируйте образ');return;}
-  // п.8: no duplicate check removed
+  const rk=looksRandomItems.map(i=>String(i.id)).sort().join(',');
+  if(looks.some(l=>(l.itemIds||[]).map(id=>String(id)).sort().join(',')===rk)){toast('Такой образ уже сохранён!');genLooksRandom();return;}
   const hasWR=looksRandomItems.some(i=>String(i.id).startsWith('w'));
   looks.unshift({id:Date.now(),itemIds:looksRandomItems.map(i=>i.id),itemNames:looksRandomItems.map(i=>i.name),itemCats:looksRandomItems.map(i=>i.category),note:'',hasWish:hasWR,style:'casual',createdAt:new Date().toISOString()});
   save();updateStats();renderLooks();toast('✓ Образ сохранён');genLooksRandom();
@@ -1312,8 +1315,8 @@ async function saveLook(){
     if(idx>=0){looks[idx]={...looks[idx],itemIds:selIds,itemNames:items.map(i=>i.name),itemCats:items.map(i=>i.category),note,hasWish};}
     window._editingLookId=null;
   } else {
-    const nk=selIds.slice().sort().join(',');
-    if(looks.some(l=>(l.itemIds||[]).slice().sort().join(',')===nk)){toast('Такой образ уже сохранён!');return;}
+    const nk=selIds.map(id=>String(id)).sort().join(',');
+    if(looks.some(l=>(l.itemIds||[]).map(id=>String(id)).sort().join(',')===nk)){toast('Такой образ уже сохранён!');return;}
     looks.unshift({id:Date.now(),itemIds:selIds,itemNames:items.map(i=>i.name),itemCats:items.map(i=>i.category),note,hasWish,style:'casual',createdAt:new Date().toISOString()});
   }
   save();closeModal('lookModal');updateStats();renderLooks();toast('✓ Образ сохранён');
