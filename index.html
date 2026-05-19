@@ -715,9 +715,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 let db=null; const PC={};
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open('WardrobeDB',2);r.onupgradeneeded=e=>{if(!e.target.result.objectStoreNames.contains('photos'))e.target.result.createObjectStore('photos');};r.onsuccess=e=>{db=e.target.result;res();};r.onerror=()=>rej(r.error);});}
 function dbSet(id,data){return new Promise((res,rej)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').put(data,String(id));tx.oncomplete=res;tx.onerror=()=>rej(tx.error);});}
-function dbGet(id){return new Promise(res=>{try{const tx=db.transaction('photos','readonly');const r=tx.objectStore('photos').get(String(id));r.onsuccess=()=>res(r.result||null);r.onerror=()=>res(null);}catch{res(null);}});}
+function dbGet(id){return new Promise(res=>{
+  const timeout=setTimeout(()=>res(null),3000); // не ждать больше 3с
+  try{
+    const tx=db.transaction('photos','readonly');
+    const r=tx.objectStore('photos').get(String(id));
+    r.onsuccess=()=>{clearTimeout(timeout);res(r.result||null);};
+    r.onerror=()=>{clearTimeout(timeout);res(null);};
+    tx.onerror=()=>{clearTimeout(timeout);res(null);};
+  }catch{clearTimeout(timeout);res(null);}
+});}
 function dbDel(id){if(!db)return;try{db.transaction('photos','readwrite').objectStore('photos').delete(String(id));}catch{}}
-async function photo(id){if(!id)return null;const k=String(id);if(PC[k])return PC[k];const s=await dbGet(k);if(s)PC[k]=s;return s;}
+async function photo(id){
+  if(!id)return null;
+  const k=String(id);
+  if(PC[k])return PC[k];
+  try{
+    // Timeout: если IndexedDB зависла (нестабильная сеть/браузер) — вернуть null за 2с
+    const s=await Promise.race([
+      dbGet(k),
+      new Promise(res=>setTimeout(()=>res(null),2000))
+    ]);
+    if(s)PC[k]=s;
+    return s||null;
+  }catch{return null;}
+}
 function dbGetAll(){return new Promise(res=>{try{const tx=db.transaction('photos','readonly');const kr=tx.objectStore('photos').getAllKeys();const vr=tx.objectStore('photos').getAll();let keys,vals;kr.onsuccess=e=>{keys=e.target.result;if(vals)res(Object.fromEntries(keys.map((k,i)=>[k,vals[i]])));};vr.onsuccess=e=>{vals=e.target.result;if(keys)res(Object.fromEntries(keys.map((k,i)=>[k,vals[i]])));};kr.onerror=()=>res({});}catch{res({});}});}
 async function dbSetAll(obj){for(const[k,v] of Object.entries(obj)){await dbSet(k,v);PC[k]=v;}}
 
@@ -1373,19 +1395,28 @@ function dislikeOutfit(src){
   }
   if(src==='home')genOutfit();else genLooksRandom();
 }
-async function renderDislikedList(){
+function renderDislikedList(){
   const el=document.getElementById('dislikedList');if(!el)return;
   if(!dislikedOutfits.length){el.innerHTML='<div style="color:var(--text-light);font-size:13px;padding:6px 0;">Нет несочетаемых образов</div>';return;}
-  const parts=await Promise.all(dislikedOutfits.map(async(d,di)=>{
-    const thumbsSrc=await Promise.all((d.ids||[]).slice(0,4).map(id=>photo(id)));
-    const thumbsHtml=thumbsSrc.filter(Boolean).map(src=>`<img src="${src}" style="width:38px;height:50px;object-fit:cover;border-radius:6px;flex-shrink:0;">`).join('');
+  // Render immediately with placeholders, load photos async
+  el.innerHTML=dislikedOutfits.map((d,di)=>{
+    const placeholders=(d.ids||[]).slice(0,4).map((_,pi)=>`<div id="dth-${di}-${pi}" style="width:38px;height:50px;background:var(--warm-beige);border-radius:6px;flex-shrink:0;"></div>`).join('');
     return`<div style="padding:10px 0;border-bottom:1px solid var(--warm-beige);display:flex;align-items:center;gap:10px;">
-      <div style="display:flex;gap:3px;flex-shrink:0;">${thumbsHtml||`<div style="width:38px;height:50px;background:var(--warm-beige);border-radius:6px;"></div>`}</div>
+      <div style="display:flex;gap:3px;flex-shrink:0;">${placeholders||`<div style="width:38px;height:50px;background:var(--warm-beige);border-radius:6px;"></div>`}</div>
       <div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:500;color:var(--text-dark);margin-bottom:2px;">${d.names.join(', ')}</div><div style="font-size:11px;color:var(--text-light);">${new Date(d.ts).toLocaleDateString('ru-RU')}</div></div>
       <button onclick="removeDisliked(dislikedOutfits[${di}].key)" style="padding:5px 10px;border-radius:50px;font-size:12px;cursor:pointer;border:1px solid var(--warm-beige);background:var(--cream);color:var(--text-mid);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;flex-shrink:0;">Убрать</button>
     </div>`;
-  }));
-  el.innerHTML=parts.join('');
+  }).join('');
+  // Load photos in background
+  dislikedOutfits.forEach((d,di)=>{
+    (d.ids||[]).slice(0,4).forEach((id,pi)=>{
+      photo(id).then(src=>{
+        if(!src)return;
+        const el2=document.getElementById(`dth-${di}-${pi}`);
+        if(el2)el2.outerHTML=`<img src="${src}" style="width:38px;height:50px;object-fit:cover;border-radius:6px;flex-shrink:0;">`;
+      }).catch(()=>{});
+    });
+  });
 }
 let looksItemCatFilter='';
 function looksItemCatClick(cat,el){
@@ -1568,18 +1599,18 @@ async function saveWishItem(){
     wishlist.unshift(item);save();updateStats();closeModal('wishAddModal');renderWishlist();toast('✓ Добавлено в вишлист');
   }
 }
-async function renderWishlist(){
+function renderWishlist(){
   let items=wishlist;
   if(wishCatFilter!=='all')items=items.filter(i=>i.category===wishCatFilter);
   if(wishSeaFilter!=='all')items=items.filter(i=>{const s=Array.isArray(i.seasons)?i.seasons:[i.season||'all'];return s.includes(wishSeaFilter)||s.includes('all');});
   document.getElementById('wishCnt').textContent=`(${wishlist.length})`;
   const g=document.getElementById('wishGrid');
   if(!items.length){g.innerHTML=`<div class="empty-state">Вишлист пуст или нет вещей по фильтру.<br>Добавляйте из Шоппинга или по кнопке выше!</div>`;return;}
-  const parts=await Promise.all(items.map(async it=>{
-    const src=it.hasPhoto?await photo(it.id):null;
+  // Render immediately without photos, then fill photos async
+  function wishItemHtml(it,src){
     const linkHtml=it.link?`<a class="wish-link-btn" href="${it.link}" target="_blank" rel="noopener"><i class="ti ti-external-link" style="font-size:11px;flex-shrink:0;"></i>Открыть в магазине</a>`:'';
     return`<div class="wish-item" onclick="openWishAddModal(${it.id})">
-      <div class="wish-img">${src?`<img src="${src}">`:`<div>${it.emoji||'🛍️'}</div>`}</div>
+      <div class="wish-img" id="wi-img-${it.id}">${src?`<img src="${src}">`:`<div>${it.emoji||'🛍️'}</div>`}</div>
       <button class="wish-del" onclick="delWish(${it.id},event)"><i class="ti ti-x" style="font-size:10px;"></i></button>
       <div class="wish-body">
         <div class="wish-name" title="${it.name}">${short4(it.name)}</div>
@@ -1589,8 +1620,18 @@ async function renderWishlist(){
         ${it.match?`<div class="wish-match"><i class="ti ti-sparkles" style="font-size:11px;"></i>${it.match}% совпадение</div>`:''}
       </div>
     </div>`;
-  }));
-  g.innerHTML=parts.join('');
+  }
+  // Show instantly with emoji placeholders
+  g.innerHTML=items.map(it=>wishItemHtml(it,null)).join('');
+  // Then load photos in background one by one
+  items.forEach(it=>{
+    if(!it.hasPhoto)return;
+    photo(it.id).then(src=>{
+      if(!src)return;
+      const el=document.getElementById('wi-img-'+it.id);
+      if(el)el.innerHTML=`<img src="${src}">`;
+    }).catch(()=>{});
+  });
 }
 function delWish(id,e){if(e)e.stopPropagation();if(!confirm('Удалить из вишлиста?'))return;wishlist=wishlist.filter(i=>i.id!==id);dbDel(id);delete PC[String(id)];save();updateStats();renderWishlist();toast('Удалено');}
 
