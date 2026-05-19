@@ -10,8 +10,46 @@
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <title>WARDROBE</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+/* Offline-safe fonts: use system fonts instead of Google Fonts */
+:root {
+  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+/* Inline Tabler icon replacements — SVG via CSS mask or text symbols */
+/* Each .ti class renders its icon via a data-URI SVG background */
+.ti { display:inline-flex; align-items:center; justify-content:center;
+      width:1em; height:1em; font-style:normal; font-size:inherit;
+      vertical-align:-0.125em; }
+.ti::before { content:''; display:block; width:100%; height:100%;
+              background-color:currentColor;
+              -webkit-mask-size:contain; mask-size:contain;
+              -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+              -webkit-mask-position:center; mask-position:center; }
+/* SVG masks for each icon used in the app */
+.ti-home::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M5 12L12 5l7 7'/%3E%3Cpath d='M5 12v7a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-7'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M5 12L12 5l7 7'/%3E%3Cpath d='M5 12v7a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-7'/%3E%3C/svg%3E");}
+.ti-hanger::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 6a2 2 0 10-2 2 1 1 0 000 2L3 17a2 2 0 001.891 2.667h14.218A2 2 0 0021 17l-7-7a1 1 0 000-2'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 6a2 2 0 10-2 2 1 1 0 000 2L3 17a2 2 0 001.891 2.667h14.218A2 2 0 0021 17l-7-7a1 1 0 000-2'/%3E%3C/svg%3E");}
+.ti-layout-grid::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Crect x='4' y='4' width='6' height='6' rx='1'/%3E%3Crect x='14' y='4' width='6' height='6' rx='1'/%3E%3Crect x='4' y='14' width='6' height='6' rx='1'/%3E%3Crect x='14' y='14' width='6' height='6' rx='1'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Crect x='4' y='4' width='6' height='6' rx='1'/%3E%3Crect x='14' y='4' width='6' height='6' rx='1'/%3E%3Crect x='4' y='14' width='6' height='6' rx='1'/%3E%3Crect x='14' y='14' width='6' height='6' rx='1'/%3E%3C/svg%3E");}
+.ti-shopping-bag::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z'/%3E%3Cpath d='M3 6h18'/%3E%3Cpath d='M16 10a4 4 0 01-8 0'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z'/%3E%3Cpath d='M3 6h18'/%3E%3Cpath d='M16 10a4 4 0 01-8 0'/%3E%3C/svg%3E");}
+.ti-heart::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z'/%3E%3C/svg%3E");}
+.ti-settings::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z'/%3E%3C/svg%3E");}
+.ti-plus::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E");}
+.ti-stack-2::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 3L2 9l10 6 10-6-10-6zM2 15l10 6 10-6'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 3L2 9l10 6 10-6-10-6zM2 15l10 6 10-6'/%3E%3C/svg%3E");}
+.ti-sparkles::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3zM5 17l.75 2.25L8 20l-2.25.75L5 23l-.75-2.25L2 20l2.25-.75L5 17zM19 3l.75 2.25L22 6l-2.25.75L19 9l-.75-2.25L16 6l2.25-.75L19 3z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3zM5 17l.75 2.25L8 20l-2.25.75L5 23l-.75-2.25L2 20l2.25-.75L5 17zM19 3l.75 2.25L22 6l-2.25.75L19 9l-.75-2.25L16 6l2.25-.75L19 3z'/%3E%3C/svg%3E");}
+.ti-x::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5'%3E%3Cpath d='M18 6L6 18M6 6l12 12'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5'%3E%3Cpath d='M18 6L6 18M6 6l12 12'/%3E%3C/svg%3E");}
+.ti-check::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E");}
+.ti-pencil::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7'/%3E%3Cpath d='M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7'/%3E%3Cpath d='M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z'/%3E%3C/svg%3E");}
+.ti-camera-plus::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V8l-3-5h-2'/%3E%3Ccircle cx='12' cy='13' r='3'/%3E%3Cpath d='M15 3v4h4'/%3E%3Cpath d='M12 8v2M12 16v2M8 12h2M14 12h2' stroke-width='1.5'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V8l-3-5h-2'/%3E%3Ccircle cx='12' cy='13' r='3'/%3E%3Cpath d='M15 3v4h4'/%3E%3Cpath d='M12 8v2M12 16v2M8 12h2M14 12h2' stroke-width='1.5'/%3E%3C/svg%3E");}
+.ti-photo-plus::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpath d='M21 15l-5-5L5 21'/%3E%3Cpath d='M19 3v6M16 6h6' stroke-width='2'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpath d='M21 15l-5-5L5 21'/%3E%3Cpath d='M19 3v6M16 6h6' stroke-width='2'/%3E%3C/svg%3E");}
+.ti-droplet::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 11-11.31 0z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 11-11.31 0z'/%3E%3C/svg%3E");}
+.ti-wind::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2'/%3E%3C/svg%3E");}
+.ti-temperature::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z'/%3E%3C/svg%3E");}
+.ti-shirt::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z'/%3E%3C/svg%3E");}
+.ti-viewfinder::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 3v3M12 18v3M3 12h3M18 12h3'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 3v3M12 18v3M3 12h3M18 12h3'/%3E%3C/svg%3E");}
+.ti-shoe::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M4 12h4l3-8 4 4 3-2 2 6H4z'/%3E%3Cpath d='M2 16h20v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M4 12h4l3-8 4 4 3-2 2 6H4z'/%3E%3Cpath d='M2 16h20v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2z'/%3E%3C/svg%3E");}
+.ti-external-link::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6'/%3E%3Cpath d='M15 3h6v6M10 14L21 3'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6'/%3E%3Cpath d='M15 3h6v6M10 14L21 3'/%3E%3C/svg%3E");}
+/* Spinner (used inline, no icon class needed) */
+</style>
 <style>
 :root{
   --cream:#F5F0E8;--warm-beige:#EDE5D8;--sand:#D4C4A8;
@@ -22,11 +60,11 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-dark);max-width:430px;margin:0 auto;overflow-x:hidden;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--cream);color:var(--text-dark);max-width:430px;margin:0 auto;overflow-x:hidden;}
 
 /* HEADER — logo + action buttons only, NO nav tabs */
 .app-header{background:var(--white);padding:14px 16px 10px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--warm-beige);display:flex;align-items:center;justify-content:space-between;}
-.app-logo{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:var(--espresso);}
+.app-logo{font-family:Georgia,'Times New Roman',serif;font-size:21px;font-weight:700;color:var(--espresso);}
 .app-logo span{color:var(--gold);}
 .hdr-btns{display:flex;gap:6px;}
 .icon-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--warm-beige);background:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--espresso);font-size:17px;flex-shrink:0;}
@@ -39,31 +77,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 .weather-card{background:linear-gradient(135deg,var(--espresso),var(--mocha));border-radius:var(--r-lg);padding:18px;color:white;margin-bottom:16px;position:relative;overflow:hidden;}
 .weather-card::before{content:'';position:absolute;right:-20px;top:-20px;width:130px;height:130px;background:rgba(255,255,255,.06);border-radius:50%;}
 .weather-top{display:flex;justify-content:space-between;align-items:flex-start;}
-.weather-temp{font-family:'Playfair Display',serif;font-size:48px;font-weight:700;line-height:1;}
+.weather-temp{font-family:Georgia,'Times New Roman',serif;font-size:48px;font-weight:700;line-height:1;}
 .weather-feel{font-size:12px;opacity:.7;margin-top:3px;}
 .weather-details{display:flex;gap:14px;margin-top:14px;}
 .weather-detail{font-size:12px;opacity:.8;display:flex;align-items:center;gap:4px;}
 .city-row{display:flex;align-items:center;gap:8px;margin-top:5px;}
 .city-name{font-size:13px;font-weight:500;opacity:.9;}
-.city-edit-btn{background:rgba(255,255,255,.2);border:none;color:white;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.city-edit-btn{background:rgba(255,255,255,.2);border:none;color:white;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
 .city-search-row{display:none;margin-top:8px;gap:8px;}
 .city-search-row.open{display:flex;}
-.city-inp{flex:1;padding:7px 11px;border-radius:8px;border:none;background:rgba(255,255,255,.2);color:white;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
+.city-inp{flex:1;padding:7px 11px;border-radius:8px;border:none;background:rgba(255,255,255,.2);color:white;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;outline:none;}
 .city-inp::placeholder{color:rgba(255,255,255,.6);}
 .city-go{background:rgba(255,255,255,.3);border:none;color:white;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;}
 
 /* COMMON */
-.section-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--espresso);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
-.see-all{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;color:var(--mocha);cursor:pointer;}
+.section-title{font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:600;color:var(--espresso);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.see-all{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;font-weight:400;color:var(--mocha);cursor:pointer;}
 .stat-row{display:flex;gap:8px;margin-bottom:16px;}
 .stat-card{flex:1;background:var(--white);border-radius:var(--r-md);padding:12px;text-align:center;border:1px solid var(--warm-beige);}
-.stat-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--espresso);}
+.stat-num{font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:700;color:var(--espresso);}
 .stat-label{font-size:11px;color:var(--text-light);margin-top:2px;}
 .chips{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-bottom:14px;}
 .chips::-webkit-scrollbar{display:none;}
 .chip{flex-shrink:0;padding:7px 14px;border-radius:50px;font-size:13px;cursor:pointer;border:1px solid var(--warm-beige);background:var(--white);color:var(--text-mid);}
 .chip.active{background:var(--espresso);color:white;border-color:var(--espresso);}
-.btn{flex:1;padding:11px;border-radius:var(--r-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;}
+.btn{flex:1;padding:11px;border-radius:var(--r-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
 .btn-dark{background:var(--espresso);color:white;}
 .btn-light{background:var(--cream);color:var(--espresso);border:1px solid var(--warm-beige);}
 .btn-gold{background:var(--gold);color:white;}
@@ -105,10 +143,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 .sheet{background:var(--white);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:20px 16px 28px;width:100%;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;animation:up .28s ease;}
 @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .handle{width:38px;height:4px;background:var(--sand);border-radius:2px;margin:0 auto 18px;}
-.modal-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--espresso);margin-bottom:18px;}
+.modal-title{font-family:Georgia,'Times New Roman',serif;font-size:19px;font-weight:600;color:var(--espresso);margin-bottom:18px;}
 .fg{margin-bottom:14px;}
 .fl{font-size:11px;font-weight:600;color:var(--text-mid);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;display:block;}
-.fi,.fs{width:100%;padding:11px 13px;border:1px solid var(--warm-beige);border-radius:var(--r-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text-dark);background:var(--cream);outline:none;}
+.fi,.fs{width:100%;padding:11px 13px;border:1px solid var(--warm-beige);border-radius:var(--r-sm);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--text-dark);background:var(--cream);outline:none;}
 .fs{appearance:none;}
 
 /* SEASON CHIPS */
@@ -140,7 +178,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 .bq-thumb{width:64px;height:82px;border-radius:var(--r-sm);object-fit:cover;flex-shrink:0;background:var(--warm-beige);cursor:pointer;border:2px solid transparent;transition:border-color .15s;}
 .bq-thumb:hover{border-color:var(--gold);}
 .bq-fields{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;}
-.bq-sel{padding:7px 9px;border:1px solid var(--warm-beige);border-radius:var(--r-sm);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-dark);background:var(--white);outline:none;appearance:none;width:100%;}
+.bq-sel{padding:7px 9px;border:1px solid var(--warm-beige);border-radius:var(--r-sm);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;color:var(--text-dark);background:var(--white);outline:none;appearance:none;width:100%;}
 .bq-grid2{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
 .bq-sea-chips{display:flex;gap:4px;flex-wrap:wrap;}
 .bq-sea-chip{padding:4px 9px;border-radius:50px;font-size:11px;cursor:pointer;border:1px solid var(--warm-beige);background:var(--white);color:var(--text-mid);}
@@ -154,7 +192,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 .bq-remove{background:none;border:none;color:var(--text-light);cursor:pointer;font-size:17px;padding:0;flex-shrink:0;}
 .bq-status{font-size:10px;color:var(--text-light);}
 .bq-status.done{color:var(--sage);}
-.bulk-save-btn{width:100%;padding:14px;border-radius:var(--r-md);background:var(--espresso);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:7px;}
+.bulk-save-btn{width:100%;padding:14px;border-radius:var(--r-md);background:var(--espresso);color:white;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:7px;}
 .bulk-save-btn:disabled{opacity:.5;}
 
 /* SHOP */
@@ -170,7 +208,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 .si-name{font-size:12px;font-weight:500;color:var(--text-dark);margin-bottom:3px;}
 .si-price{font-size:13px;font-weight:500;color:var(--mocha);margin-bottom:7px;}
 .si-actions{display:flex;gap:5px;}
-.si-btn{flex:1;padding:7px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;}
+.si-btn{flex:1;padding:7px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
 .si-wish{background:var(--cream);color:var(--text-mid);border:1px solid var(--warm-beige);}
 .si-go{background:var(--espresso);color:white;}
 
@@ -235,12 +273,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 
 /* SETTINGS */
 .settings-section{background:var(--white);border-radius:var(--r-lg);padding:16px;margin-bottom:16px;border:1px solid var(--warm-beige);}
-.settings-section h3{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--espresso);margin-bottom:12px;}
+.settings-section h3{font-family:Georgia,'Times New Roman',serif;font-size:15px;font-weight:600;color:var(--espresso);margin-bottom:12px;}
 .settings-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--warm-beige);}
 .settings-row:last-child{border-bottom:none;padding-bottom:0;}
 .settings-row-label{font-size:13px;color:var(--text-dark);}
 .settings-row-sub{font-size:11px;color:var(--text-light);margin-top:2px;}
-.settings-btn{padding:8px 14px;border-radius:50px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;}
+.settings-btn{padding:8px 14px;border-radius:50px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
 .settings-path-display{font-size:11px;color:var(--text-light);margin-top:6px;font-style:italic;word-break:break-all;}
 
 /* COLOR PRESETS */
@@ -248,7 +286,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 .color-preset-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0;transition:transform .15s;}
 .color-preset-dot:hover{transform:scale(1.15);}
 .color-preset-dot.sel{border-color:var(--espresso);}
-.color-more-btn{padding:5px 12px;border-radius:50px;font-size:12px;cursor:pointer;border:1px solid var(--warm-beige);background:var(--cream);color:var(--text-mid);font-family:'DM Sans',sans-serif;}
+.color-more-btn{padding:5px 12px;border-radius:50px;font-size:12px;cursor:pointer;border:1px solid var(--warm-beige);background:var(--cream);color:var(--text-mid);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
 .color-palette-wrap{display:none;margin-top:8px;}
 .color-palette-wrap.open{display:block;}
 /* MISC */
@@ -258,7 +296,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-box{grid-column:span 2;text-align:center;padding:36px;color:var(--text-light);font-size:13px;}
 .filter-row{display:flex;gap:8px;margin-bottom:14px;}
-.filter-sel{flex:1;padding:9px 11px;border:1px solid var(--warm-beige);border-radius:50px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-dark);background:var(--white);outline:none;appearance:none;}
+.filter-sel{flex:1;padding:9px 11px;border:1px solid var(--warm-beige);border-radius:50px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:var(--text-dark);background:var(--white);outline:none;appearance:none;}
 .empty-state{grid-column:span 2;text-align:center;padding:36px 16px;color:var(--text-light);font-size:14px;line-height:1.8;}
 .ai-bar{display:none;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--text-mid);padding:8px 11px;background:var(--warm-beige);border-radius:var(--r-sm);}
 .ai-bar.show{display:flex;}
@@ -438,14 +476,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
         <div class="settings-row-label">Экспорт данных</div>
         <div class="settings-row-sub">Все вещи, луки, фото → JSON-файл</div>
       </div>
-      <button class="settings-btn" onclick="exportBackup()" style="background:var(--espresso);color:white;padding:8px 14px;border-radius:50px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;">⬇ Экспорт</button>
+      <button class="settings-btn" onclick="exportBackup()" style="background:var(--espresso);color:white;padding:8px 14px;border-radius:50px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">⬇ Экспорт</button>
     </div>
     <div class="settings-row">
       <div>
         <div class="settings-row-label">Импорт данных</div>
         <div class="settings-row-sub">Восстановить из файла резервной копии</div>
       </div>
-      <button class="settings-btn" onclick="document.getElementById('importFile').click()" style="background:var(--cream);color:var(--espresso);border:1px solid var(--warm-beige);padding:8px 14px;border-radius:50px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">⬆ Импорт</button>
+      <button class="settings-btn" onclick="document.getElementById('importFile').click()" style="background:var(--cream);color:var(--espresso);border:1px solid var(--warm-beige);padding:8px 14px;border-radius:50px;font-size:12px;font-weight:500;cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">⬆ Импорт</button>
     </div>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
     <div class="settings-row">
@@ -520,7 +558,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
         <i class="ti ti-camera-plus"></i><p>Нажмите чтобы выбрать фото</p>
       </div>
       <img id="addPreview" style="width:100%;max-height:170px;object-fit:cover;border-radius:var(--r-md);display:none;margin-top:8px;">
-      <button id="addReCropBtn" style="display:none;margin-top:6px;width:100%;padding:8px;border:1px solid var(--warm-beige);border-radius:var(--r-sm);background:var(--cream);font-size:12px;color:var(--text-mid);cursor:pointer;font-family:'DM Sans',sans-serif;" onclick="reCrop('add')">✂ Перекадрировать</button>
+      <button id="addReCropBtn" style="display:none;margin-top:6px;width:100%;padding:8px;border:1px solid var(--warm-beige);border-radius:var(--r-sm);background:var(--cream);font-size:12px;color:var(--text-mid);cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;" onclick="reCrop('add')">✂ Перекадрировать</button>
       <input type="file" id="addFile" accept="image/*" style="display:none" onchange="onAddPhoto(event)">
       
     </div>
@@ -565,7 +603,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
         <label for="editFile" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px dashed var(--sand);border-radius:var(--r-sm);font-size:13px;color:var(--text-mid);cursor:pointer;background:var(--cream);">
           <i class="ti ti-camera-plus"></i> Заменить
         </label>
-        <button id="editCropExistBtn" style="flex:1;display:none;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px solid var(--warm-beige);border-radius:var(--r-sm);font-size:13px;color:var(--text-mid);cursor:pointer;background:var(--cream);font-family:'DM Sans',sans-serif;" onclick="reCrop('edit')">&#x2702; Кадрировать</button>
+        <button id="editCropExistBtn" style="flex:1;display:none;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px solid var(--warm-beige);border-radius:var(--r-sm);font-size:13px;color:var(--text-mid);cursor:pointer;background:var(--cream);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;" onclick="reCrop('edit')">&#x2702; Кадрировать</button>
       </div>
       <input type="file" id="editFile" accept="image/*" style="display:none" onchange="onEditPhoto(event)">
     </div>
@@ -605,11 +643,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
     <div class="bulk-drop" id="bulkDrop">
       <i class="ti ti-photo-plus"></i>
       <div style="font-size:14px;font-weight:500;color:var(--text-dark);margin-bottom:4px;">Выберите фото из галереи</div>
-      <label for="bulkFileInput" style="display:inline-block;margin-top:10px;padding:9px 22px;background:var(--espresso);color:white;border-radius:50px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">📷 Выбрать фото</label>
+      <label for="bulkFileInput" style="display:inline-block;margin-top:10px;padding:9px 22px;background:var(--espresso);color:white;border-radius:50px;font-size:13px;font-weight:500;cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">📷 Выбрать фото</label>
     </div>
     <input type="file" id="bulkFileInput" accept="image/*" multiple style="display:none" onchange="handleBulkFiles(event)">
     <div id="bulkAddMoreRow" style="display:none;margin-bottom:10px;">
-      <label for="bulkMore" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:10px;border:1px solid var(--warm-beige);border-radius:var(--r-sm);background:var(--cream);font-size:13px;color:var(--text-mid);cursor:pointer;font-family:'DM Sans',sans-serif;"><i class="ti ti-plus"></i> Добавить ещё фото</label>
+      <label for="bulkMore" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:10px;border:1px solid var(--warm-beige);border-radius:var(--r-sm);background:var(--cream);font-size:13px;color:var(--text-mid);cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;"><i class="ti ti-plus"></i> Добавить ещё фото</label>
       <input type="file" id="bulkMore" accept="image/*" multiple style="display:none" onchange="handleBulkFiles(event)">
     </div>
     <div id="bulkQueue" class="bulk-queue"></div>
@@ -643,7 +681,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-d
         <i class="ti ti-camera-plus"></i><p>Фото из магазина или своё</p>
       </div>
       <img id="wishAddPreview" style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--r-md);display:none;margin-top:8px;">
-      <button id="wishReCropBtn" style="display:none;margin-top:6px;width:100%;padding:8px;border:1px solid var(--warm-beige);border-radius:var(--r-sm);background:var(--cream);font-size:12px;color:var(--text-mid);cursor:pointer;font-family:'DM Sans',sans-serif;" onclick="reCrop('wish')">✂ Перекадрировать</button>
+      <button id="wishReCropBtn" style="display:none;margin-top:6px;width:100%;padding:8px;border:1px solid var(--warm-beige);border-radius:var(--r-sm);background:var(--cream);font-size:12px;color:var(--text-mid);cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;" onclick="reCrop('wish')">✂ Перекадрировать</button>
       <input type="file" id="wishAddFile" accept="image/*" style="display:none" onchange="onWishPhoto(event)">
     </div>
     <div class="fg"><label class="fl">Название</label><input class="fi" id="waN" placeholder="Название вещи"></div>
@@ -1344,7 +1382,7 @@ async function renderDislikedList(){
     return`<div style="padding:10px 0;border-bottom:1px solid var(--warm-beige);display:flex;align-items:center;gap:10px;">
       <div style="display:flex;gap:3px;flex-shrink:0;">${thumbsHtml||`<div style="width:38px;height:50px;background:var(--warm-beige);border-radius:6px;"></div>`}</div>
       <div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:500;color:var(--text-dark);margin-bottom:2px;">${d.names.join(', ')}</div><div style="font-size:11px;color:var(--text-light);">${new Date(d.ts).toLocaleDateString('ru-RU')}</div></div>
-      <button onclick="removeDisliked(dislikedOutfits[${di}].key)" style="padding:5px 10px;border-radius:50px;font-size:12px;cursor:pointer;border:1px solid var(--warm-beige);background:var(--cream);color:var(--text-mid);font-family:'DM Sans',sans-serif;flex-shrink:0;">Убрать</button>
+      <button onclick="removeDisliked(dislikedOutfits[${di}].key)" style="padding:5px 10px;border-radius:50px;font-size:12px;cursor:pointer;border:1px solid var(--warm-beige);background:var(--cream);color:var(--text-mid);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;flex-shrink:0;">Убрать</button>
     </div>`;
   }));
   el.innerHTML=parts.join('');
