@@ -1,4 +1,4 @@
-const CACHE = 'wardrobe-v18';
+const CACHE = 'wardrobe-v19';
 // Only cache local assets — no external CDN urls that may fail
 const ASSETS = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 

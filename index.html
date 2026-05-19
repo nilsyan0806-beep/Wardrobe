@@ -753,7 +753,7 @@ let shopCat='all',wishCatFilter='all',wishSeaFilter='all',looksFilterVal='all',l
 let bulkQueue=[];
 let looksRandomItems=[];
 let dislikedOutfits=[];
-function loadDisliked(){try{dislikedOutfits=JSON.parse(localStorage.getItem('wb_disliked')||'[]');}catch{dislikedOutfits=[];}}
+function loadDisliked(){try{dislikedOutfits=JSON.parse(localStorage.getItem('wb_disliked')||'[]');}catch{dislikedOutfits=[];}if(!Array.isArray(dislikedOutfits))dislikedOutfits=[];}
 function saveDisliked(){try{localStorage.setItem('wb_disliked',JSON.stringify(dislikedOutfits));}catch{}}
 function outfitKey(items){return items.map(i=>String(i.id)).slice().sort().join(',');}
 function isDisliked(items){const k=outfitKey(items);return dislikedOutfits.some(d=>d.key===k);}
@@ -767,7 +767,15 @@ function isSavedLook(items){
 }
 
 
-function load(){try{wardrobe=JSON.parse(localStorage.getItem('wb_w')||'[]');}catch{wardrobe=[];}try{looks=JSON.parse(localStorage.getItem('wb_l')||'[]');}catch{looks=[];}looks.forEach(l=>{if(l.note==='Случайный образ')l.note='';});try{wishlist=JSON.parse(localStorage.getItem('wb_wish')||'[]');}catch{wishlist=[];}}
+function load(){
+  try{wardrobe=JSON.parse(localStorage.getItem('wb_w')||'[]');}catch{wardrobe=[];}
+  if(!Array.isArray(wardrobe))wardrobe=[];
+  try{looks=JSON.parse(localStorage.getItem('wb_l')||'[]');}catch{looks=[];}
+  if(!Array.isArray(looks))looks=[];
+  looks.forEach(l=>{if(l.note==='Случайный образ')l.note='';});
+  try{wishlist=JSON.parse(localStorage.getItem('wb_wish')||'[]');}catch{wishlist=[];}
+  if(!Array.isArray(wishlist))wishlist=[];
+}
 function save(){try{localStorage.setItem('wb_w',JSON.stringify(wardrobe));localStorage.setItem('wb_l',JSON.stringify(looks));localStorage.setItem('wb_wish',JSON.stringify(wishlist));}catch{toast('⚠️ Хранилище заполнено');}}
 
 // ═══ BACKUP ═══
@@ -959,11 +967,10 @@ function go(id){
     if(btnBulk)btnBulk.style.display='none';
     if(btnAdd){btnAdd.style.display='flex';btnAdd.title='Собрать образ';if(btnAdd.querySelector('i'))btnAdd.querySelector('i').className='ti ti-sparkles';btnAdd.setAttribute('onclick','openLookModal()');}
   } else if(id==='shop'||id==='wishlist'){
-    btnBulk.style.display='none';
-    btnAdd.style.display='flex';btnAdd.title='Добавить желание';
-    if(btnAdd&&btnAdd.querySelector('i'))btnAdd.querySelector('i').className='ti ti-heart';
-    btnAdd.setAttribute('onclick','openWishAddModal()');
-    if(btnWish)btnWish.style.display='none';
+    if(btnBulk)btnBulk.style.display='none';
+    if(btnAdd){btnAdd.style.display='flex';btnAdd.title='Добавить желание';
+    if(btnAdd.querySelector('i'))btnAdd.querySelector('i').className='ti ti-heart';
+    btnAdd.setAttribute('onclick','openWishAddModal()');}
   } else {
     if(btnBulk)btnBulk.style.display='none';
     if(btnAdd)btnAdd.style.display='none';
@@ -1396,6 +1403,7 @@ function dislikeOutfit(src){
   if(src==='home')genOutfit();else genLooksRandom();
 }
 function renderDislikedList(){
+  if(!Array.isArray(dislikedOutfits))dislikedOutfits=[];
   const el=document.getElementById('dislikedList');if(!el)return;
   if(!dislikedOutfits.length){el.innerHTML='<div style="color:var(--text-light);font-size:13px;padding:6px 0;">Нет несочетаемых образов</div>';return;}
   // Render immediately with placeholders, load photos async
@@ -1600,6 +1608,7 @@ async function saveWishItem(){
   }
 }
 function renderWishlist(){
+  if(!Array.isArray(wishlist))wishlist=[];
   let items=wishlist;
   if(wishCatFilter!=='all')items=items.filter(i=>i.category===wishCatFilter);
   if(wishSeaFilter!=='all')items=items.filter(i=>{const s=Array.isArray(i.seasons)?i.seasons:[i.season||'all'];return s.includes(wishSeaFilter)||s.includes('all');});
@@ -1644,7 +1653,7 @@ function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 // buttons managed by go() via setAttribute
 
 // ═══ INIT ═══
-openDB().then(()=>{load();setDate();loadWeather();updateStats();renderRecent();renderShop();}).catch(()=>{load();setDate();loadWeather();updateStats();renderRecent();renderShop();});
+openDB().then(()=>{load();loadDisliked();setDate();loadWeather();updateStats();renderRecent();renderShop();}).catch(()=>{load();loadDisliked();setDate();loadWeather();updateStats();renderRecent();renderShop();});
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 </script>
 </body>
